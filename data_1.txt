@@ -1,0 +1,20 @@
+2010.05.18_00:00:00   2010.05.19_00:00:00    Test of HMI script 9000 while in inertial mode for AIA reboot and reload
+2010.05.18_00:00:00   2010.05.19_00:00:00    AIA reboot and reload
+2010.05.27_00:00:00   2010.05.28_00:00:00    AIA GT/PZT calibration
+2010.11.10_06:01:20   2010.11.10_18:34:16    HMI inertial mode pointing test
+2013.04.30_17:50:00   2013.04.30_18:19:00    HMI sequencer stopped for tuning motor reset
+2015.04.08_18:50:00   2015.04.08_18:50:00    HMI retune and exposure change
+2015.05.05_19:54:00   2015.05.05_21:08:00    HMI Mod-L test
+2016.03.08_04:00:45   2016.03.08_04:32:15    HMI Mod-L test
+2016.03.24_20:50:15   2016.03.24_20:50:15    SDO return to nominal roll
+2016.04.19_18:54:45   2016.04.19_19:15:00    HMI Mercury transit test
+2016.04.26_18:54:45   2016.04.26_19:11:15    HMI Mercury transit test
+2016.05.03_10:20:00   2016.05.03_10:30:00    HMI Mercury transit test
+2016.09.26_16:11:00   2016.09.26_16:58:00    IRU operation
+2017.11.29_21:39:00   2017.11.29_22:08:15    AIA guide telescope calibration maneuver
+2018.10.12_23:00:00   2018.10.12_23:30:00    HMI focus and thermal change test
+2018.10.12_23:30:00   2018.10.13_18:30:00    HMI erroneously remained at 135s test cadence
+2019.04.23_18:27:00   2019.04.23_18:46:00    HMI retune and exposure change
+2019.08.15_05:35:00   2019.08.15_07:47:00    SDO High gain antenna hit "keep out" zone
+2020.10.04_05:03:00   2020.10.05_18:17:00    HMI table parity error
+2020.10.21_18:03:00   2020.10.21_18:14:00    HMI retune

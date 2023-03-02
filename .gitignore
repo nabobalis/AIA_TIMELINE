@@ -128,3 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .history/
+
+# We don't want to check in the generated files
+timeline.csv
+timeline.txt
