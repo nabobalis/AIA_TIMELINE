@@ -1,0 +1,112 @@
+2020.12.02    AIA GT/PZT calibration
+2020.12.02    Weekly cals
+2020.12.08    Weekly cals
+2020.12.09    Delta-H maneuver
+2020.12.16    Weekly cals
+2020.12.23    Weekly cals
+2020.12.30    HMI camera anomaly
+2020.12.30    Weekly cals
+2021.01.06    EVE FOV and AIA/HMI flat field maneuvers
+2021.01.06    Weekly cals
+2021.01.13    HMI roll maneuver
+2021.01.13    Lunar transit
+2021.01.13    Weekly cals
+2021.01.20    EVE cruciform
+2021.01.20    Weekly cals
+2021.01.27    Weekly cals
+2021.01.28    Beginning of eclipse season
+2021.02.02    Weekly cals
+2021.02.03    AIA GT/PZT calibration
+2021.02.09    Weekly cals
+2021.02.10    Delta-V maneuver
+2021.02.24    Weekly cals
+2021.03.03    Weekly cals
+2021.03.10    Weekly cals
+2021.03.17    Weekly cals
+2021.03.24    Weekly cals
+2021.03.30    Weekly cals
+2021.03.31    AIA GT/PZT calibration
+2021.04.06    Weekly cals
+2021.04.07    EVE FOV and AIA/HMI flat field maneuvers
+2021.04.13    Weekly cals
+2021.04.14    EVE cruciform
+2021.04.20    Weekly cals
+2021.04.26    Camera 2 parity error
+2021.04.27    Weekly cals
+2021.04.28    Parker Probe off-point
+2021.04.29    Parker Probe off-point
+2021.05.04    Weekly cals
+2021.05.05    Delta-H maneuver
+2021.05.12    Weekly cals
+2021.05.19    Weekly cals
+2021.05.25    Weekly cals
+2021.05.26    AIA GT/PZT calibration
+2021.06.02    Weekly cals
+2021.06.09    Weekly cals
+2021.06.15    Weekly cals
+2021.06.16    IRU-3 power cycle
+2021.06.23    Weekly cals
+2021.06.30    Weekly cals
+2021.07.07    HMI roll maneuver
+2021.07.09    Weekly cals
+2021.07.10    Lunar transit
+2021.07.13    Weekly cals
+2021.07.14    EVE cruciform and HMI retune
+2021.07.20    Weekly cals
+2021.07.21    EVE FOV and AIA/HMI flat field maneuvers
+2021.07.27    HMI parity error recovery
+2021.07.27    Weekly cals
+2021.07.28    AIA GT/PZT calibration
+2021.07.29    Beginning of eclipse season
+2021.08.03    Weekly cals
+2021.08.04    Delta-V maneuver
+2021.08.11    Weekly cals
+2021.08.18    Weekly cals
+2021.08.23    End of eclipse season
+2021.08.25    Weekly cals
+2021.09.01    Weekly cals
+2021.09.08    Weekly cals
+2021.09.15    Weekly cals
+2021.09.21    Weekly cals
+2021.09.22    Delta-H maneuver
+2021.09.28    Weekly cals
+2021.09.29    AIA GT/PZT calibration
+2021.10.05    HMI parity error
+2021.10.06    HMI parity error
+2021.10.06    Sequencer stopped to clear parity error
+2021.10.06    Weekly cals
+2021.10.13    EVE cruciform and exposure update
+2021.10.19    Weekly cals
+2021.10.20    HMI roll maneuver
+2021.10.27    EVE FOV and AIA/HMI flat field maneuvers
+2021.10.28    Weekly cals
+2021.11.03    Weekly cals
+2021.11.10    Weekly cals
+2021.11.17    Weekly cals
+2021.11.24    Weekly cals
+2021.12.01    AIA GT/PZT calibration
+2021.12.01    Weekly cals
+2021.12.07    Special hourly detunes & focus sweeps
+2021.12.08    Special hourly detunes & focus sweeps
+2021.12.14    Weekly cals
+2021.12.15    Delta-H maneuver
+2021.12.22    Weekly cals
+2021.12.29    Weekly cals
+2022.01.05    Weekly cals
+2022.01.11    Weekly cals
+2022.01.12    EVE FOV and AIA/HMI flat field maneuvers
+2022.01.18    Weekly cals
+2022.01.19    EVE cruciform
+2022.01.24    Beginning of eclipse season
+2022.01.24    Problems with HGA handover
+2022.01.26    AIA GT/PZT calibration
+2022.01.26    Weekly cals
+2022.02.02    Delta-V maneuver
+2022.02.02    Weekly cals
+2022.02.09    Weekly cals
+2022.02.16    End of eclipse season
+2022.02.16    Weekly cals
+2022.02.23    Weekly cals
+2022.03.02    Weekly cals
+2022.03.09    Weekly cals
+2022.03.16    Weekly cals
