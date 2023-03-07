@@ -484,5 +484,6 @@ if __name__ == "__main__":
     final_timeline["Comment"] = final_timeline["Comment"].fillna("No Comment")
     final_timeline = drop_duplicates(final_timeline)
     print(f"{len(final_timeline.index)} rows in after deduplication")
-    final_timeline.to_csv("timeline.csv", index=False)
-    final_timeline.to_csv("timeline.txt", sep="\t", index=False)
+    today_date = pd.Timestamp("today").strftime("%Y%m%d")
+    final_timeline.to_csv(f"timeline_{today_date}.csv", index=False)
+    final_timeline.to_csv(f"timeline_{today_date}.txt", sep="\t", index=False)
