@@ -372,8 +372,11 @@ def process_html(url: str, data: pd.DataFrame) -> pd.DataFrame:
             # Eighth column is the HMI Description
             comment = text[2].strip() or text[4].strip() or text[7].strip()
             instrument = "SDO" if text[2].strip() else "AIA" if text[4].strip() else "HMI"
-            start_date = _clean_date(text[0])
-            end_date = _clean_date(text[1]) if len(text[1]) > 1 else "NaT"
+            extra_replace = False
+            if "jsocobs_info" in url:
+                extra_replace = True
+            start_date = _clean_date(text[0], extra_replace=extra_replace)
+            end_date = _clean_date(text[1], extra_replace=extra_replace) if len(text[1]) > 1 else "NaT"
             start_date = _format_date(start_date, year)
             end_date = _format_date(end_date, year, start_date)
             new_data = pd.Series(
