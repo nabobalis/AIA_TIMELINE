@@ -311,6 +311,7 @@ def process_txt(filepath: str, skiprows: Optional[list], data: pd.DataFrame) -> 
         new_data = _process_time(new_data)
         new_data["Instrument"] = new_data["Comment"].apply(lambda x: "AIA" if "AIA" in x else None)
         new_data["Instrument"] = new_data["Comment"].apply(lambda x: "HMI" if "HMI" in x else None)
+    new_data["Source"] = filepath.split("/")[-1]
     data = pd.concat([data, new_data], ignore_index=True)
     return data
 
@@ -359,6 +360,7 @@ def process_html(url: str, data: pd.DataFrame) -> pd.DataFrame:
         new_data = pd.DataFrame(
             {"Start Time": start_dates, "End Time": end_dates, "Instrument": instrument, "Comment": comment}
         )
+        new_data["Source"] = url.split("/")[-1]
         data = pd.concat([data, new_data])
     else:
         for row in rows[1:]:
@@ -382,6 +384,7 @@ def process_html(url: str, data: pd.DataFrame) -> pd.DataFrame:
             new_data = pd.Series(
                 {"Start Time": start_date, "End Time": end_date, "Instrument": instrument, "Comment": comment}
             )
+            new_data["Source"] = url.split("/")[-1]
             data = pd.concat([data, pd.DataFrame([new_data], columns=new_data.index)]).reset_index(drop=True)
     return data
 
@@ -425,11 +428,12 @@ def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
     pd.DataFrame
         Deduplicated dataframe.
     """
-    blank_timeline = pd.DataFrame(columns=["Start Time", "End Time", "Instrument", "Comment"])
+    blank_timeline = pd.DataFrame(columns=["Start Time", "End Time", "Instrument", "Source", "Comment"])
     first_row = {
         "Start Time": data["Start Time"][0],
         "End Time": data["End Time"][0],
         "Instrument": data["Instrument"][0],
+        "Source": data["Source"][0],
         "Comment": data["Comment"][0],
     }
     blank_timeline = pd.concat([blank_timeline, pd.DataFrame([first_row])])
@@ -444,11 +448,16 @@ def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
                 blank_timeline.loc[blank_timeline["Start Time"] == row["Start Time"], "Comment"] = (
                     blank_timeline.iloc[-1]["Comment"] + " and " + row["Comment"]
                 )
+            if row["Source"] not in blank_timeline.iloc[-1]["Source"]:
+                blank_timeline.loc[blank_timeline["Start Time"] == row["Start Time"], "Source"] = (
+                    blank_timeline.iloc[-1]["Source"] + " and " + row["Source"]
+                )
             continue
         insert_row = {
             "Start Time": row["Start Time"],
             "End Time": row["End Time"],
             "Instrument": row["Instrument"],
+            "Source": row["Source"],
             "Comment": row["Comment"],
         }
         blank_timeline = pd.concat([blank_timeline, pd.DataFrame([insert_row])])
@@ -456,7 +465,7 @@ def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    final_timeline = pd.DataFrame(columns=["Start Time", "End Time", "Instrument", "Comment"])
+    final_timeline = pd.DataFrame(columns=["Start Time", "End Time", "Instrument", "Source", "Comment"])
     for key, block in DATASETS.items():
         print(f"Scraping {key}")
         print(f"{len(final_timeline.index)} rows so far")
