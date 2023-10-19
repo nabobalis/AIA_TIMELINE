@@ -7,73 +7,10 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-CY_END = int(str(datetime.now().year + 1)[2:])
-TIMEFORMATS = [
-    "%d-%b-%y %H:%M:%S",  # 06-Apr-10 21:11:55
-    "%Y.%m.%d",  # 2010.05.18
-    "%y-%j-%H:%M:%S",  # YY-DOY-HH:MM:SS
-    "%Y.%m.%d_%H:%M:%S",  # 2010.11.10_06:01:20
-    "%d-%b-%Y %H:%M:%S",  # 9-Apr-2010 07:30:00
-]
-MAP_4 = {
-    0: "Roll Maneuvers",
-    1: "Momentum Management Maneuvers",
-    2: "Station-Keeping Maneuvers",
-    3: "Eclipse Season Begins",
-    4: "Eclipse Season Ends",
-    5: "Battery Voltage Adjustments",
-    6: "EVE Crucform Maneuvers",
-    7: "EVE FOV & Offpoint Maneuvers",
-    8: "GT/PZT Calibrations",
-    9: "CCD Bakeout",
-    10: "Regulus Offpoint",
-    11: "Comet Offpoint",
-    12: "Camera Anomaly",
-    13: "Transit Ops/Transit",
-    14: "IRU Operations",
-    15: "load shed",
-    16: "Load/Software Anomaly/Error",
-    17: "Table Parity Error",
-    18: "Misc Instrument Errors Not Listed Above",
-    19: "Misc Tests/Special Ops",
-}
-DATASETS = {
-    "spacecraft_night": {
-        "URL": "https://aia.lmsal.com/public/sdo_spacecraft_night.txt",
-        "SKIPROWS": [0, 1, 2, 3],
-    },
-    "jsocobs_info": {
-        "fURL": "https://aia.lmsal.com/public/jsocobs_info{}.html",
-        "RANGE": range(10, CY_END),
-    },
-    # # This site has a whole range of text files and its easier to scrape the urls that way.
-    # # Assumption is that each text file on this page has the same structure
-    "jsocinst_calibrations": {
-        "URL": "https://aia.lmsal.com/public/jsocinst_calibrations.html",
-        "SKIPROWS": [0],
-        "SCRAPE": True,
-    },
-    "hmi_obs_cov": {
-        "fURL": "http://jsoc.stanford.edu/doc/data/hmi/cov2/cov{}.html",
-        "RANGE": range(10, CY_END),
-        "MONTH_RANGE": range(1, 13),
-    },
-    "text_block_1": {
-        "URL": "./data_1.txt",
-    },
-    "text_block_2": {
-        "URL": "./data_2.txt",
-    },
-    "text_block_3": {
-        "URL": "./data_3.txt",
-    },
-    "text_block_4": {
-        "URL": "./data_4.txt",
-    },
-}
+from config import DATASETS, MAP_4, TIME_FORMATS
 
 
-def _format_date(date: str, year: str, _hack: Optional[datetime] = None) -> pd.Timestamp:
+def _format_date(date: str, year: Optional[str], _hack: Optional[datetime] = None) -> pd.Timestamp:
     """
     Formats the given date.
 
@@ -81,21 +18,18 @@ def _format_date(date: str, year: str, _hack: Optional[datetime] = None) -> pd.T
     ----------
     date : str
         Date string from the html file.
-    year : str
-        The year of the provided dates, it is not present in the date.
-    _hack : datetime, optional
+    year : str, optional
+        The year of the provided dates, if it is not present in the date.
+    _hack : datetime.datetime, optional
         A workaround for some dates, by default None.
 
     Returns
     -------
-    pd.Timestamp
+    pandas.Timestamp
         New date.
     """
-    try:
-        new_date = pd.Timestamp(date)
-        return new_date
-    except ValueError:
-        pass
+    if year is None:
+        return pd.Timestamp(date)
     # Only date e., '11/2' assuming month/day
     if len(date) in [4, 5]:
         # Deal with only times with a hack
@@ -142,10 +76,11 @@ def _clean_date(date: str, extra_replace: bool = False) -> str:
         .replace("ongoing", "")
         .replace("AIA", "")
         .replace("HMI", "")
-        # One very specific date
+        # TODO: Improve this
+        # Very specific dates
         # 2018-10/16 10:00 - 21:00
         .replace("- 21:00", "")
-    )
+    ).split("-")[0]
     if extra_replace:
         # Some hours are 4/4 05.50 so we replace them here
         # However, sometimes the date is 2010.05.01 - 02
@@ -166,14 +101,14 @@ def _process_time(data: pd.DataFrame, column: int = 0) -> pd.DataFrame:
     column : int, optional
         The column to process, by default 0.
     """
-    for time_format in TIMEFORMATS:
+    for time_format in TIME_FORMATS:
         try:
-            data[data.columns[column]] = data.iloc[:, column].apply(lambda x: datetime.strptime(x, time_format))
+            data.iloc[:, column] = data.iloc[:, column].apply(lambda x: datetime.strptime(x, time_format))
             return data
         except Exception:
             pass
     else:
-        raise ValueError("Could not find a suitable time format")
+        raise ValueError(f"Could not find a suitable time format: {data.iloc[0, column]}")
 
 
 def _process_end_time(data: pd.DataFrame, column: int = 1) -> pd.DataFrame:
@@ -264,7 +199,7 @@ def _reformat_data(data: pd.DataFrame, filepath: str) -> pd.DataFrame:
     return data
 
 
-def process_txt(filepath: str, skiprows: Optional[list], data: pd.DataFrame) -> pd.DataFrame:
+def process_txt(filepath: str, skip_rows: Optional[list], data: pd.DataFrame) -> pd.DataFrame:
     """
     Processes a text file.
 
@@ -272,7 +207,7 @@ def process_txt(filepath: str, skiprows: Optional[list], data: pd.DataFrame) -> 
     ----------
     filepath : str
         File path of the text file.
-    skiprows : list, None
+    skip_rows : list, None
         What rows to skip.
     data : pd.DataFrame
         Dataframe to append to.
@@ -286,7 +221,7 @@ def process_txt(filepath: str, skiprows: Optional[list], data: pd.DataFrame) -> 
         new_data = pd.read_fwf(
             filepath,
             header=None if "sdo_spacecraft_night" in filepath else 0,
-            skiprows=skiprows,
+            skiprows=skip_rows,
         )
         new_data = _process_time(new_data)
         new_data[new_data.columns[1]] = new_data.iloc[:, 1].apply(
@@ -306,11 +241,17 @@ def process_txt(filepath: str, skiprows: Optional[list], data: pd.DataFrame) -> 
                 pass
             new_data = _process_data(new_data, filepath)
     else:
-        new_data = pd.read_csv(filepath, header=None, sep="    ", skiprows=skiprows, engine="python")
+        new_data = pd.read_csv(filepath, header=None, sep="    ", skiprows=skip_rows, engine="python")
         new_data = _reformat_data(new_data, filepath)
         new_data = _process_time(new_data)
         new_data["Instrument"] = new_data["Comment"].apply(lambda x: "AIA" if "AIA" in x else None)
         new_data["Instrument"] = new_data["Comment"].apply(lambda x: "HMI" if "HMI" in x else None)
+    new_data["Source"] = filepath.split("/")[-1]
+    data = pd.concat([data, new_data], ignore_index=True)
+    if data.empty:
+        data = new_data
+    else:
+        data = pd.concat([data, new_data], ignore_index=True)
     new_data["Source"] = filepath.split("/")[-1]
     data = pd.concat([data, new_data], ignore_index=True)
     return data
@@ -343,10 +284,9 @@ def process_html(url: str, data: pd.DataFrame) -> pd.DataFrame:
     table = table[-1]
     rows = table.find_all("tr")
     # TODO: Regex to get the year
-    try:
+    year = None
+    if "jsocobs_info" in url:
         year = url.split("info")[1].split(".")[0]
-    except Exception:
-        year = url.split("cov")[2].split(".")[0][:4]
     # These HTML tables are by column and not by row
     if "hmi/cov2/" in url:
         new_rows = rows[0].text.split("\n\n")
@@ -428,7 +368,6 @@ def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
     pd.DataFrame
         Deduplicated dataframe.
     """
-    blank_timeline = pd.DataFrame(columns=["Start Time", "End Time", "Instrument", "Source", "Comment"])
     first_row = {
         "Start Time": data["Start Time"][0],
         "End Time": data["End Time"][0],
@@ -436,21 +375,23 @@ def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
         "Source": data["Source"][0],
         "Comment": data["Comment"][0],
     }
-    blank_timeline = pd.concat([blank_timeline, pd.DataFrame([first_row])])
+    updated_timeline = pd.DataFrame([first_row])
     for idx, row in data.iterrows():
         if idx == 0:
             continue
-        if row["Start Time"] - blank_timeline.iloc[-1]["Start Time"] <= pd.Timedelta("5 minute"):
-            blank_timeline.loc[blank_timeline["Start Time"] == row["Start Time"], "End Time"] = row["End Time"]
-            if blank_timeline.iloc[-1]["Instrument"] != row["Instrument"]:
-                blank_timeline.loc[blank_timeline["Start Time"] == row["Start Time"], "Instrument"] = "SDO"
-            if row["Comment"] not in blank_timeline.iloc[-1]["Comment"]:
-                blank_timeline.loc[blank_timeline["Start Time"] == row["Start Time"], "Comment"] = (
-                    blank_timeline.iloc[-1]["Comment"] + " and " + row["Comment"]
+        # We want to combine events that <=5 minutes apart
+        if row["Start Time"] - updated_timeline.iloc[-1]["Start Time"] <= pd.Timedelta("5 minute"):
+            updated_timeline.loc[updated_timeline["Start Time"] == row["Start Time"], "End Time"] = row["End Time"]
+            # Need to update the instrument and comment if they are different
+            if updated_timeline.iloc[-1]["Instrument"] != row["Instrument"]:
+                updated_timeline.loc[updated_timeline["Start Time"] == row["Start Time"], "Instrument"] = "SDO"
+            if row["Comment"] not in updated_timeline.iloc[-1]["Comment"]:
+                updated_timeline.loc[updated_timeline["Start Time"] == row["Start Time"], "Comment"] = (
+                    updated_timeline.iloc[-1]["Comment"] + " and " + row["Comment"]
                 )
-            if row["Source"] not in blank_timeline.iloc[-1]["Source"]:
-                blank_timeline.loc[blank_timeline["Start Time"] == row["Start Time"], "Source"] = (
-                    blank_timeline.iloc[-1]["Source"] + " and " + row["Source"]
+            if row["Source"] not in updated_timeline.iloc[-1]["Source"]:
+                updated_timeline.loc[updated_timeline["Start Time"] == row["Start Time"], "Source"] = (
+                    updated_timeline.iloc[-1]["Source"] + " and " + row["Source"]
                 )
             continue
         insert_row = {
@@ -460,14 +401,14 @@ def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
             "Source": row["Source"],
             "Comment": row["Comment"],
         }
-        blank_timeline = pd.concat([blank_timeline, pd.DataFrame([insert_row])])
-    return blank_timeline
+        updated_timeline = pd.concat([updated_timeline, pd.DataFrame([insert_row])])
+    return updated_timeline
 
 
 if __name__ == "__main__":
     final_timeline = pd.DataFrame(columns=["Start Time", "End Time", "Instrument", "Source", "Comment"])
-    for key, block in DATASETS.items():
-        print(f"Scraping {key}")
+    for dataset_name, block in DATASETS.items():
+        print(f"Scraping {dataset_name}")
         print(f"{len(final_timeline.index)} rows so far")
         urls = [block.get("URL")]
         if block.get("SCRAPE"):
@@ -482,7 +423,7 @@ if __name__ == "__main__":
         for url in sorted(urls):
             print(f"Parsing {url}")
             if "txt" in url:
-                final_timeline = process_txt(url, block.get("SKIPROWS"), final_timeline)
+                final_timeline = process_txt(url, block.get("SKIP_ROWS"), final_timeline)
             elif "html" in url:
                 final_timeline = process_html(url, final_timeline)
             else:
@@ -499,3 +440,4 @@ if __name__ == "__main__":
     today_date = pd.Timestamp("today").strftime("%Y%m%d")
     final_timeline.to_csv(f"timeline_{today_date}.csv", index=False)
     final_timeline.to_csv(f"timeline_{today_date}.txt", sep="\t", index=False)
+    print(f"Files were saved to {os.getcwd()}")

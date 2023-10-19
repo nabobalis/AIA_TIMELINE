@@ -131,3 +131,4 @@ dmypy.json
 
 # We don't want to check in the generated files
 timeline*
+index.html
