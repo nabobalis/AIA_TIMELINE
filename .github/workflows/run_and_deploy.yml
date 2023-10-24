@@ -54,19 +54,20 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: rendered files
+          name: files
           path: |
             timeline*
             index.html
 
   deploy:
-    if: |
-      (
-        github.event_name != 'pull_request' && (
-        github.ref_name != 'main' ||
-        github.event_name == 'workflow_dispatch'
-        )
-      )
+    needs: [run_script]
+    # if: |
+    #   (
+    #     github.event_name != 'pull_request' && (
+    #     github.ref_name != 'main' ||
+    #     github.event_name == 'workflow_dispatch'
+    #     )
+    #   )
     runs-on: ubuntu-latest
     steps:
     - name: Get current date
@@ -74,15 +75,18 @@ jobs:
       run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
     - name: Download all workflow run artifacts
       uses: actions/download-artifact@v3
+      with:
+        name: files
+        path: files
     - name: Upload files to release
       uses: svenstaro/upload-release-action@v2
       with:
         tag: ${{ steps.date.outputs.date }}
-        file: timeline*
+        file: files/timeline*
         overwrite: true
         body: "Latest version of the timeline"
     - name: Push index.html to branch page
       if: ${{ github.ref }} == 'refs/heads/main'
       uses: JamesIves/github-pages-deploy-action@v4
       with:
-        folder: ./
+        folder: ./files

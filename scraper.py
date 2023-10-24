@@ -114,7 +114,7 @@ def _process_time(data: pd.DataFrame, column: int = 0) -> pd.DataFrame:
 def _process_end_time(data: pd.DataFrame, column: int = 1) -> pd.DataFrame:
     # Add date to end time
     data[data.columns[column]] = pd.to_datetime(
-        pd.to_datetime(data.iloc[:, 0]).dt.strftime("%m/%d/%Y") + " " + data.iloc[:, column]
+        pd.to_datetime(data.iloc[:, 0]).dt.strftime("%m/%d/%Y") + " " + data.iloc[:, column],
     )
     # Increment date if end time is before start time
     timedelta = [
@@ -158,8 +158,7 @@ def _process_data(data: pd.DataFrame, filepath: str) -> pd.DataFrame:
     else:
         # Assumption that the comment is the first row which pandas turns into a column
         data["Comment"] = pd.read_fwf(filepath).columns[0]
-    data = data.loc[:, ["Start Time", "End Time", "Instrument", "Comment"]]
-    return data
+    return data.loc[:, ["Start Time", "End Time", "Instrument", "Comment"]]
 
 
 def _reformat_data(data: pd.DataFrame, filepath: str) -> pd.DataFrame:
@@ -225,7 +224,7 @@ def process_txt(filepath: str, skip_rows: Optional[list], data: pd.DataFrame) ->
         )
         new_data = _process_time(new_data)
         new_data[new_data.columns[1]] = new_data.iloc[:, 1].apply(
-            lambda x: pd.Timestamp(str(x).replace(":stol_", "")) if ":stol_" in str(x) else x
+            lambda x: pd.Timestamp(str(x).replace(":stol_", "")) if ":stol_" in str(x) else x,
         )
         if "sdo_spacecraft_night" not in filepath:
             new_data = _process_end_time(new_data)
@@ -253,8 +252,7 @@ def process_txt(filepath: str, skip_rows: Optional[list], data: pd.DataFrame) ->
     else:
         data = pd.concat([data, new_data], ignore_index=True)
     new_data["Source"] = filepath.split("/")[-1]
-    data = pd.concat([data, new_data], ignore_index=True)
-    return data
+    return pd.concat([data, new_data], ignore_index=True)
 
 
 def process_html(url: str, data: pd.DataFrame) -> pd.DataFrame:
@@ -298,7 +296,7 @@ def process_html(url: str, data: pd.DataFrame) -> pd.DataFrame:
         start_dates = [(_format_date(_clean_date(date), year)) for date in dates]
         end_dates = [None] * len(dates)
         new_data = pd.DataFrame(
-            {"Start Time": start_dates, "End Time": end_dates, "Instrument": instrument, "Comment": comment}
+            {"Start Time": start_dates, "End Time": end_dates, "Instrument": instrument, "Comment": comment},
         )
         new_data["Source"] = url.split("/")[-1]
         data = pd.concat([data, new_data])
@@ -322,7 +320,7 @@ def process_html(url: str, data: pd.DataFrame) -> pd.DataFrame:
             start_date = _format_date(start_date, year)
             end_date = _format_date(end_date, year, start_date)
             new_data = pd.Series(
-                {"Start Time": start_date, "End Time": end_date, "Instrument": instrument, "Comment": comment}
+                {"Start Time": start_date, "End Time": end_date, "Instrument": instrument, "Comment": comment},
             )
             new_data["Source"] = url.split("/")[-1]
             data = pd.concat([data, pd.DataFrame([new_data], columns=new_data.index)]).reset_index(drop=True)
