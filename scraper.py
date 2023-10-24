@@ -1,11 +1,12 @@
-import os
 from datetime import datetime
 from itertools import product
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from loguru import logger
 
 from config import DATASETS, MAP_4, TIME_FORMATS
 
@@ -53,7 +54,7 @@ def _format_date(date: str, year: Optional[str], _hack: Optional[datetime] = Non
     return new_date
 
 
-def _clean_date(date: str, extra_replace: bool = False) -> str:
+def _clean_date(date: str, *, extra_replace: bool = False) -> str:
     """
     Removes any non-numeric characters from the date.
 
@@ -103,7 +104,9 @@ def _process_time(data: pd.DataFrame, column: int = 0) -> pd.DataFrame:
     """
     for time_format in TIME_FORMATS:
         try:
-            data.iloc[:, column] = data.iloc[:, column].apply(lambda x: datetime.strptime(x, time_format))
+            data.iloc[:, column] = data.iloc[:, column].apply(
+                lambda x, time_format=time_format: datetime.strptime(x, time_format),
+            )
             return data
         except Exception:
             pass
@@ -217,6 +220,7 @@ def process_txt(filepath: str, skip_rows: Optional[list], data: pd.DataFrame) ->
         Dataframe with the data from the text file.
     """
     if "http" in filepath:
+        logger.debug(f"Processing {filepath}")
         new_data = pd.read_fwf(
             filepath,
             header=None if "sdo_spacecraft_night" in filepath else 0,
@@ -231,7 +235,7 @@ def process_txt(filepath: str, skip_rows: Optional[list], data: pd.DataFrame) ->
         if len(new_data.columns) in [2, 3]:
             new_data = _process_data(new_data, filepath)
         elif len(new_data.columns) > 3:
-            print(f"Unexpected number of columns for {filepath}, dropping all but first two")
+            logger.debug(f"Unexpected number of columns for {filepath}, dropping all but first two")
             new_data = new_data.iloc[:, [0, 1]]
             new_data.columns = ["Start Time", "End Time"]
             try:
@@ -290,7 +294,6 @@ def process_html(url: str, data: pd.DataFrame) -> pd.DataFrame:
         new_rows = rows[0].text.split("\n\n")
         # Time is one single element whereas each event text is a separate element
         dates, text = new_rows[0].strip().split("\n"), new_rows[1:-1]
-        # new_rows = [f"{date} {comment}" for date, comment in zip(dates, text)]
         instrument = ["HMI" if "HMI" in new_row else "AIA" if "AIA" in new_row else "SDO" for new_row in text]
         comment = [new_row.replace("\n", " ") for new_row in text]
         start_dates = [(_format_date(_clean_date(date), year)) for date in dates]
@@ -341,7 +344,7 @@ def scrape_url(url: str) -> list:
     list
         List of all the urls scraped.
     """
-    base_url = os.path.dirname(url)
+    base_url = str(Path(url).parent).replace("https:/", "https://")
     request = requests.get(url)
     soup = BeautifulSoup(request.text, "html.parser")
     urls = []
@@ -406,8 +409,8 @@ def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
 if __name__ == "__main__":
     final_timeline = pd.DataFrame(columns=["Start Time", "End Time", "Instrument", "Source", "Comment"])
     for dataset_name, block in DATASETS.items():
-        print(f"Scraping {dataset_name}")
-        print(f"{len(final_timeline.index)} rows so far")
+        logger.info(f"Scraping {dataset_name}")
+        logger.info(f"{len(final_timeline.index)} rows so far")
         urls = [block.get("URL")]
         if block.get("SCRAPE"):
             urls = scrape_url(block["URL"])
@@ -419,7 +422,7 @@ if __name__ == "__main__":
             else:
                 urls = [block["fURL"].format(f"20{i:02}") for i in block["RANGE"]]
         for url in sorted(urls):
-            print(f"Parsing {url}")
+            logger.info(f"Parsing {url}")
             if "txt" in url:
                 final_timeline = process_txt(url, block.get("SKIP_ROWS"), final_timeline)
             elif "html" in url:
@@ -427,15 +430,15 @@ if __name__ == "__main__":
             else:
                 raise ValueError(f"Unknown file type for {url}")
 
-    print(f"{len(final_timeline.index)} rows in total")
+    logger.info(f"{len(final_timeline.index)} rows in total")
     final_timeline = final_timeline.sort_values("Start Time")
     final_timeline = final_timeline.reset_index(drop=True)
     final_timeline["End Time"] = final_timeline["End Time"].fillna("Unknown")
     final_timeline["Instrument"] = final_timeline["Instrument"].fillna("SDO")
     final_timeline["Comment"] = final_timeline["Comment"].fillna("No Comment")
     final_timeline = drop_duplicates(final_timeline)
-    print(f"{len(final_timeline.index)} rows in after deduplication")
+    logger.info(f"{len(final_timeline.index)} rows in after deduplication")
     today_date = pd.Timestamp("today").strftime("%Y%m%d")
     final_timeline.to_csv(f"timeline_{today_date}.csv", index=False)
     final_timeline.to_csv(f"timeline_{today_date}.txt", sep="\t", index=False)
-    print(f"Files were saved to {os.getcwd()}")
+    logger.info(f"Files were saved to {Path.cwd()}")
