@@ -85,7 +85,7 @@ jobs:
       with:
         name: Timeline created on ${{ steps.date.outputs.date }}
         tag: ${{ steps.date.outputs.date }}
-        artifacts: "/home/runner/files/timeline*"
+        artifacts: "/home/runner/files/*"
         replacesArtifacts: true
         makeLatest: true
         artifactErrorsFailBuild: true
