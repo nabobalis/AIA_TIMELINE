@@ -1,7 +1,4 @@
 beautifulsoup4==4.12.2
-ipykernel==6.25.2
-itables==1.6.2
-nbconvert==7.9.2
 pandas==2.1.1
 requests==2.31.0
 loguru==0.7.2

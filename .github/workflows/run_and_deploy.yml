@@ -47,21 +47,16 @@ jobs:
           python-version: '3.11'
       - name: Install dependencies
         run: |
-          sudo apt install pandoc
           python -m pip install tox
       - name: Run Script
         run: |
           tox -e py311
-      - name: Run notebook and create html index
-        run: |
-          tox -e notebook
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: files
           path: |
             timeline*
-            index.html
 
   deploy:
     needs: [run_script]
@@ -86,7 +81,7 @@ jobs:
         path: ~/files
     - name: Display structure of downloaded files
       run: ls -R
-      working-directory: /home/runner/
+      working-directory: /home/runner/files
     - name: Upload files then create tag and release
       uses: ncipollo/release-action@v1
       with:
@@ -98,9 +93,19 @@ jobs:
         artifactErrorsFailBuild: true
         allowUpdates: true
         token: ${{ secrets.SDOTIMELINE }}
+    - name: Checkout csv to json repository
+      uses: actions/checkout@v4
+      with:
+        repository: 'derekeder/csv-to-html-table'
+        ref: 'master'
+        path: 'csv_to_html'
+    - name: Move files to csv_to_html
+      run: |
+        mv /home/runner/files/timeline_${{ steps.date.outputs.date }}.csv /home/runner/work/SDO-Timeline/SDO-Timeline/csv_to_html/data/timeline.csv
+        mv /home/runner/work/SDO-Timeline/SDO-Timeline/index.html /home/runner/work/SDO-Timeline/SDO-Timeline/csv_to_html/
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.SDOTIMELINE }}
-        publish_dir: "/home/runner/files/"
+        publish_dir: "/home/runner/work/SDO-Timeline/SDO-Timeline/csv_to_html/"
         force_orphan: true
