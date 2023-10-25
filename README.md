@@ -19,4 +19,4 @@ Things to note:
 This runs on GitHub Actions to create the files and tag a release for them.
 It will also render the dataframe to html and push it to the `gh-pages` branch.
 
-The files are then served by GitHub Pages at `<URL>`.
+[The files are then served by GitHub Pages](https://lm-sal.github.io/SDO-Timeline/).
