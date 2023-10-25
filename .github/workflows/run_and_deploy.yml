@@ -83,8 +83,13 @@ jobs:
     - name: Upload files then create tag and release
       uses: ncipollo/release-action@v1
       with:
+        name: Timeline created on ${{ steps.date.outputs.date }}
         tag: ${{ steps.date.outputs.date }}
         artifacts: "/home/runner/files/timeline*"
+        replacesArtifacts: true
+        makeLatest: true
+        artifactErrorsFailBuild: true
+        allowUpdates: true
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
