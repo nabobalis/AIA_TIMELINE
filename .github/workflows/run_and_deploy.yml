@@ -67,6 +67,8 @@ jobs:
     #   )
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y%m%d')"
@@ -79,15 +81,12 @@ jobs:
       run: ls -R
       working-directory: /home/runner/
     - name: Upload files then create tag and release
-      uses: svenstaro/upload-release-action@v2
+      uses: ncipollo/release-action@v1
       with:
         tag: ${{ steps.date.outputs.date }}
-        file: |
-          /home/runner/files/timeline_${{ steps.date.outputs.date }}.txt
-          /home/runner/files/timeline_${{ steps.date.outputs.date }}.csv
-        overwrite: true
-        body: "Latest version of the timeline"
-    - name: Push index.html to branch page
-      uses: JamesIves/github-pages-deploy-action@v4
+        artifacts: "/home/runner/files/timeline*"
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        folder: /home/runner/files
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: "/home/runner/files/"
