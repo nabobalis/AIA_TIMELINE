@@ -1,6 +1,6 @@
 from datetime import datetime
 
-__all__ = ["CY_END", "TIME_FORMATS", "MAP_4", "DATASETS"]
+__all__ = ["CY_END", "DATASETS", "MAP_4", "TIME_FORMATS"]
 
 CY_END = int(str(datetime.now().year + 1)[2:])
 TIME_FORMATS = [
